@@ -7,7 +7,7 @@ jobs:
   build:
     name: Start Building...
     runs-on: windows-latest
-    timeout-minutes: 360  # Max limit for free GitHub Actions
+    timeout-minutes: 360
 
     steps:
       - name: Downloading & Installing Essentials
@@ -17,8 +17,14 @@ jobs:
 
       - name: Set Fixed RDP Password
         run: |
+          Import-Module Microsoft.PowerShell.Security
           $Password = ConvertTo-SecureString "MohsinXX" -AsPlainText -Force
-          Set-LocalUser -Name "Administrator" -Password $Password
+          $User = Get-LocalUser | Where-Object { $_.Name -match "runneradmin" }
+          if ($User) {
+            Set-LocalUser -Name $User.Name -Password $Password
+          } else {
+            Write-Host "User not found!"
+          }
         shell: pwsh
 
       - name: Enable RDP & Firewall Rules
